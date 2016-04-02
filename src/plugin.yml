@@ -1,0 +1,12 @@
+name: TModsServerAddons_DoubleJump
+main: me.tmods.serveraddons.DoubleJump
+version: 1.51
+author: Timo Hocker
+website: http://timosmods.weebly.com
+
+depends:
+ - TModsServerUtils
+ 
+Permissions:
+  ServerAddons.doubleJump
+  ServerAddons.denyFallDamage
