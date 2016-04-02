@@ -1,10 +1,15 @@
 package me.tmods.serveraddons;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -16,19 +21,24 @@ import me.tmods.serverutils.Methods;
 public class DoubleJump extends JavaPlugin implements Listener{
 	public static File maincfgfile = new File("plugins/TModsServerUtils", "config.yml");
 	public static FileConfiguration maincfg = YamlConfiguration.loadConfiguration(maincfgfile);
+	public List<Player> jumping = new ArrayList<Player>();
 	@Override
 	public void onEnable() {
 		Bukkit.getPluginManager().registerEvents(this, this);
+		if (Bukkit.getOnlinePlayers().size() > 0) {
+			for (Player p:Bukkit.getOnlinePlayers()) {
+				p.setAllowFlight(false);
+			}
+		}
 	}
 	
-	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent event) {
 		try {
 		if (event.getPlayer().hasPermission("ServerAddons.denyFallDamage") && !maincfg.getBoolean("allowFallDamage")) {
 			event.getPlayer().setFallDistance(0f);
 		}
-		if (event.getPlayer().getGameMode() != GameMode.CREATIVE && event.getPlayer().isFlying() && event.getPlayer().hasPermission("ServerAddons.doubleJump") && maincfg.getBoolean("allowDoubleJump")) {
+		if (jumping.contains(event.getPlayer()) && event.getPlayer().isFlying() && event.getPlayer().hasPermission("ServerAddons.doubleJump") && maincfg.getBoolean("allowDoubleJump")) {
 			if (maincfg.getBoolean("twoStageDoubleJump")) {
 				Vector v1 = new Vector(0,maincfg.getDouble("doubleJumpUp"),0).multiply(2);
 				event.getPlayer().setVelocity(v1);
@@ -47,14 +57,34 @@ public class DoubleJump extends JavaPlugin implements Listener{
 			Methods.playSound("Enderdragon_Flap", event.getPlayer().getLocation(), event.getPlayer());
 			event.getPlayer().setAllowFlight(false);
 		}
-		if (event.getPlayer().getGameMode() != GameMode.CREATIVE && maincfg.getBoolean("allowDoubleJump") && !event.getPlayer().getAllowFlight() && event.getPlayer().hasPermission("ServerAddons.doubleJump")) {
+		if (maincfg.getBoolean("allowDoubleJump") && !event.getPlayer().getAllowFlight() && event.getPlayer().hasPermission("ServerAddons.doubleJump")) {
 			Methods.playEffect(event.getPlayer().getLocation(), "Firework_Spark", 0, 1, false);
 		}
-		if (event.getPlayer().isOnGround() && event.getPlayer().hasPermission("ServerAddons.doubleJump") && maincfg.getBoolean("allowDoubleJump")) {
+		if (jumping.contains(event.getPlayer()) && event.getPlayer().getLocation().add(0,-1,0).getBlock().getType().isSolid() && event.getPlayer().hasPermission("ServerAddons.doubleJump") && maincfg.getBoolean("allowDoubleJump")) {
 			event.getPlayer().setAllowFlight(true);
 		}
 		} catch(Exception e) {
 			Methods.log(e);
 		}
+	}
+	@Override
+	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+		if (cmd.getName().equalsIgnoreCase("toggleJump")) {
+			if (sender instanceof Player && sender.hasPermission("ServerAddons.doubleJump")) {
+				if (jumping.contains(sender)) {
+					jumping.remove((Player)sender);
+					((Player) sender).setAllowFlight(false);
+				} else {
+					jumping.add((Player)sender);
+					((Player) sender).setAllowFlight(true);
+				}
+				sender.sendMessage("Your DoubleJump mode was set to " + jumping.contains((Player)sender));
+				return true;
+			} else {
+				sender.sendMessage(Methods.getLang("permdeny"));
+				return true;
+			}
+		}
+		return false;
 	}
 }

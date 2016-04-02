@@ -1,11 +1,16 @@
 name: TModsServerAddons_DoubleJump
 main: me.tmods.serveraddons.DoubleJump
-version: 1.6
+version: 1.61
 author: Timo Hocker
 website: http://timosmods.weebly.com
 
 depends:
  - TModsServerUtils
+ 
+commands:
+  toggleJump:
+    description: toggle your DoubleJump
+    usage: /toggleJump
  
 Permissions:
   ServerAddons.doubleJump
