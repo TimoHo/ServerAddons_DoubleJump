@@ -29,8 +29,20 @@ public class DoubleJump extends JavaPlugin implements Listener{
 			event.getPlayer().setFallDistance(0f);
 		}
 		if (event.getPlayer().getGameMode() != GameMode.CREATIVE && event.getPlayer().isFlying() && event.getPlayer().hasPermission("ServerAddons.doubleJump") && maincfg.getBoolean("allowDoubleJump")) {
-			Vector v = event.getPlayer().getLocation().getDirection().multiply(maincfg.getDouble("doubleJumpForward")).setY(maincfg.getDouble("doubleJumpUp"));
-			event.getPlayer().setVelocity(v);
+			if (maincfg.getBoolean("twoStageDoubleJump")) {
+				Vector v1 = new Vector(0,maincfg.getDouble("doubleJumpUp"),0).multiply(2);
+				Vector v2 = event.getPlayer().getLocation().getDirection().multiply(maincfg.getDouble("doubleJumpForward")).setY(maincfg.getDouble("doubleJumpUp") / 2);
+				event.getPlayer().setVelocity(v1);
+				Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+					@Override
+					public void run() {
+						event.getPlayer().setVelocity(v2);
+					}
+				},20);
+			} else {
+				Vector v = event.getPlayer().getLocation().getDirection().multiply(maincfg.getDouble("doubleJumpForward")).setY(maincfg.getDouble("doubleJumpUp"));
+				event.getPlayer().setVelocity(v);
+			}
 			Methods.playEffect(event.getPlayer().getLocation(), "Cloud", 0.5f, 200, false);
 			Methods.playSound("Enderdragon_Flap", event.getPlayer().getLocation(), event.getPlayer());
 			event.getPlayer().setAllowFlight(false);
