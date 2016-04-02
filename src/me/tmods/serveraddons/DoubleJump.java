@@ -31,14 +31,14 @@ public class DoubleJump extends JavaPlugin implements Listener{
 		if (event.getPlayer().getGameMode() != GameMode.CREATIVE && event.getPlayer().isFlying() && event.getPlayer().hasPermission("ServerAddons.doubleJump") && maincfg.getBoolean("allowDoubleJump")) {
 			if (maincfg.getBoolean("twoStageDoubleJump")) {
 				Vector v1 = new Vector(0,maincfg.getDouble("doubleJumpUp"),0).multiply(2);
-				Vector v2 = event.getPlayer().getLocation().getDirection().multiply(maincfg.getDouble("doubleJumpForward")).setY(maincfg.getDouble("doubleJumpUp") / 2);
 				event.getPlayer().setVelocity(v1);
 				Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
 					@Override
 					public void run() {
+						Vector v2 = event.getPlayer().getLocation().getDirection().multiply(maincfg.getDouble("doubleJumpForward")).setY(maincfg.getDouble("doubleJumpUp") / 2);
 						event.getPlayer().setVelocity(v2);
 					}
-				},20);
+				},10);
 			} else {
 				Vector v = event.getPlayer().getLocation().getDirection().multiply(maincfg.getDouble("doubleJumpForward")).setY(maincfg.getDouble("doubleJumpUp"));
 				event.getPlayer().setVelocity(v);
