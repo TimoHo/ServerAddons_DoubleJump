@@ -21,6 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
 import me.tmods.serverutils.Methods;
+import me.tmods.serverutils.main;
 
 public class DoubleJump extends JavaPlugin implements Listener{
 	public static File maincfgfile = new File("plugins/TModsServerUtils", "config.yml");
@@ -47,6 +48,9 @@ public class DoubleJump extends JavaPlugin implements Listener{
 		if (!Bukkit.getAllowFlight()) {
 			Methods.print("You should enable allowFlight in your server.properties to make doublejump work correctly", false, ChatColor.RED + "");
 		}
+		if (main.getVersion() != "v1_8_R3") {
+			Methods.print("The DoubleJump plugin doesn't work correctly on other versions than v1_9_R1 (but you can try it.)", false, ChatColor.RED + "");
+		}
 	}
 	@Override
 	public void onDisable() {
@@ -70,6 +74,7 @@ public class DoubleJump extends JavaPlugin implements Listener{
 			event.getPlayer().setFallDistance(0f);
 		}
 		if (jumping.contains(event.getPlayer()) && event.getPlayer().isFlying() && event.getPlayer().hasPermission("ServerAddons.doubleJump") && maincfg.getBoolean("allowDoubleJump")) {
+			event.getPlayer().setAllowFlight(false);
 			if (maincfg.getBoolean("twoStageDoubleJump")) {
 				Vector v1 = new Vector(0,maincfg.getDouble("doubleJumpUp"),0).multiply(2);
 				event.getPlayer().setVelocity(v1);
@@ -86,7 +91,16 @@ public class DoubleJump extends JavaPlugin implements Listener{
 			}
 			Methods.playEffect(event.getPlayer().getLocation(), "Cloud", 0.5f, 200, false);
 			Methods.playSound("Enderdragon_Flap", event.getPlayer().getLocation(), event.getPlayer());
-			event.getPlayer().setAllowFlight(false);
+		} else {
+			if (!jumping.contains(event.getPlayer())) {
+				event.getPlayer().sendMessage("you're not jumping!");
+			}
+			if (!event.getPlayer().isFlying()) {
+				event.getPlayer().sendMessage("jump higher!");
+			}
+			if (!event.getPlayer().hasPermission("ServerAddons.doubleJump")) {
+				event.getPlayer().sendMessage("Ha unpermissible!");
+			}
 		}
 		if (maincfg.getBoolean("allowDoubleJump") && !event.getPlayer().getAllowFlight() && event.getPlayer().hasPermission("ServerAddons.doubleJump") && jumping.contains(event.getPlayer())) {
 			Methods.playEffect(event.getPlayer().getLocation(), "Firework_Spark", 0, 1, false);
