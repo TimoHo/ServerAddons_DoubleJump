@@ -1,8 +1,10 @@
 package me.tmods.serveraddons;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -21,6 +23,8 @@ import me.tmods.serverutils.Methods;
 public class DoubleJump extends JavaPlugin implements Listener{
 	public static File maincfgfile = new File("plugins/TModsServerUtils", "config.yml");
 	public static FileConfiguration maincfg = YamlConfiguration.loadConfiguration(maincfgfile);
+	public static File maindatafile = new File("plugins/TModsServerUtils", "data.yml");
+	public static FileConfiguration maindata = YamlConfiguration.loadConfiguration(maindatafile);
 	public List<Player> jumping = new ArrayList<Player>();
 	@Override
 	public void onEnable() {
@@ -30,8 +34,30 @@ public class DoubleJump extends JavaPlugin implements Listener{
 				p.setAllowFlight(false);
 			}
 		}
+		List<String> uuids = maindata.getStringList("DoubleJump.players");
+		if (uuids.size() > 0) {
+			for (String s:uuids) {
+				if (Bukkit.getPlayer(UUID.fromString(s)) != null) {
+					jumping.add(Bukkit.getPlayer(UUID.fromString(s)));
+				}
+			}
+		}
 	}
-	
+	@Override
+	public void onDisable() {
+		List<String> uuids = new ArrayList<String>();
+		if (jumping.size() > 0) {
+			for (Player p:jumping) {
+				uuids.add(p.getUniqueId().toString());
+			}
+		}
+		maindata.set("DoubleJump.players", uuids);
+		try {
+			maindata.save(maindatafile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent event) {
 		try {
