@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -41,6 +43,9 @@ public class DoubleJump extends JavaPlugin implements Listener{
 					jumping.add(Bukkit.getPlayer(UUID.fromString(s)));
 				}
 			}
+		}
+		if (!Bukkit.getAllowFlight()) {
+			Methods.print("You should enable allowFlight in your server.properties to make doublejump work correctly", false, ChatColor.RED + "");
 		}
 	}
 	@Override
@@ -83,7 +88,7 @@ public class DoubleJump extends JavaPlugin implements Listener{
 			Methods.playSound("Enderdragon_Flap", event.getPlayer().getLocation(), event.getPlayer());
 			event.getPlayer().setAllowFlight(false);
 		}
-		if (maincfg.getBoolean("allowDoubleJump") && !event.getPlayer().getAllowFlight() && event.getPlayer().hasPermission("ServerAddons.doubleJump")) {
+		if (maincfg.getBoolean("allowDoubleJump") && !event.getPlayer().getAllowFlight() && event.getPlayer().hasPermission("ServerAddons.doubleJump") && jumping.contains(event.getPlayer())) {
 			Methods.playEffect(event.getPlayer().getLocation(), "Firework_Spark", 0, 1, false);
 		}
 		if (jumping.contains(event.getPlayer()) && event.getPlayer().getLocation().add(0,-1,0).getBlock().getType().isSolid() && event.getPlayer().hasPermission("ServerAddons.doubleJump") && maincfg.getBoolean("allowDoubleJump")) {
@@ -99,7 +104,9 @@ public class DoubleJump extends JavaPlugin implements Listener{
 			if (sender instanceof Player && sender.hasPermission("ServerAddons.doubleJump")) {
 				if (jumping.contains(sender)) {
 					jumping.remove((Player)sender);
-					((Player) sender).setAllowFlight(false);
+					if (((Player) sender).getGameMode() != GameMode.CREATIVE && ((Player) sender).getGameMode() != GameMode.SPECTATOR) {
+						((Player) sender).setAllowFlight(false);
+					}
 				} else {
 					jumping.add((Player)sender);
 					((Player) sender).setAllowFlight(true);
