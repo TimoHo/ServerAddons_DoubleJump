@@ -48,8 +48,8 @@ public class DoubleJump extends JavaPlugin implements Listener{
 		if (!Bukkit.getAllowFlight()) {
 			Methods.print("You should enable allowFlight in your server.properties to make doublejump work correctly", false, ChatColor.RED + "");
 		}
-		if (main.getVersion() != "v1_8_R3") {
-			Methods.print("The DoubleJump plugin doesn't work correctly on other versions than v1_9_R1 (but you can try it.)", false, ChatColor.RED + "");
+		if (!main.getVersion().equalsIgnoreCase("v1_8_R3")) {
+			Methods.print("The DoubleJump plugin doesn't work correctly on other versions than v1_8_R3 (but you can try it.)", false, ChatColor.RED + "");
 		}
 	}
 	@Override
