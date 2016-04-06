@@ -21,7 +21,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
 import me.tmods.serverutils.Methods;
-import me.tmods.serverutils.main;
 
 public class DoubleJump extends JavaPlugin implements Listener{
 	public static File maincfgfile = new File("plugins/TModsServerUtils", "config.yml");
@@ -32,11 +31,6 @@ public class DoubleJump extends JavaPlugin implements Listener{
 	@Override
 	public void onEnable() {
 		Bukkit.getPluginManager().registerEvents(this, this);
-		if (Bukkit.getOnlinePlayers().size() > 0) {
-			for (Player p:Bukkit.getOnlinePlayers()) {
-				p.setAllowFlight(false);
-			}
-		}
 		List<String> uuids = maindata.getStringList("DoubleJump.players");
 		if (uuids.size() > 0) {
 			for (String s:uuids) {
@@ -45,11 +39,15 @@ public class DoubleJump extends JavaPlugin implements Listener{
 				}
 			}
 		}
+		if (Bukkit.getOnlinePlayers().size() > 0) {
+			for (Player p:Bukkit.getOnlinePlayers()) {
+				if (!jumping.contains(p)) {
+					p.setAllowFlight(false);
+				}
+			}
+		}
 		if (!Bukkit.getAllowFlight()) {
 			Methods.print("You should enable allowFlight in your server.properties to make doublejump work correctly", false, ChatColor.RED + "");
-		}
-		if (!main.getVersion().equalsIgnoreCase("v1_8_R3")) {
-			Methods.print("The DoubleJump plugin doesn't work correctly on other versions than v1_8_R3 (but you can try it.)", false, ChatColor.RED + "");
 		}
 	}
 	@Override
@@ -74,6 +72,7 @@ public class DoubleJump extends JavaPlugin implements Listener{
 			event.getPlayer().setFallDistance(0f);
 		}
 		if (jumping.contains(event.getPlayer()) && event.getPlayer().isFlying() && event.getPlayer().hasPermission("ServerAddons.doubleJump") && maincfg.getBoolean("allowDoubleJump")) {
+			event.getPlayer().setFlying(false);
 			event.getPlayer().setAllowFlight(false);
 			if (maincfg.getBoolean("twoStageDoubleJump")) {
 				Vector v1 = new Vector(0,maincfg.getDouble("doubleJumpUp"),0).multiply(2);
@@ -91,16 +90,6 @@ public class DoubleJump extends JavaPlugin implements Listener{
 			}
 			Methods.playEffect(event.getPlayer().getLocation(), "Cloud", 0.5f, 200, false);
 			Methods.playSound("Enderdragon_Flap", event.getPlayer().getLocation(), event.getPlayer());
-		} else {
-			if (!jumping.contains(event.getPlayer())) {
-				event.getPlayer().sendMessage("you're not jumping!");
-			}
-			if (!event.getPlayer().isFlying()) {
-				event.getPlayer().sendMessage("jump higher!");
-			}
-			if (!event.getPlayer().hasPermission("ServerAddons.doubleJump")) {
-				event.getPlayer().sendMessage("Ha unpermissible!");
-			}
 		}
 		if (maincfg.getBoolean("allowDoubleJump") && !event.getPlayer().getAllowFlight() && event.getPlayer().hasPermission("ServerAddons.doubleJump") && jumping.contains(event.getPlayer())) {
 			Methods.playEffect(event.getPlayer().getLocation(), "Firework_Spark", 0, 1, false);
@@ -112,6 +101,31 @@ public class DoubleJump extends JavaPlugin implements Listener{
 			Methods.log(e);
 		}
 	}
+	/*
+	@EventHandler
+	public void onFlyToggle(PlayerToggleFlightEvent event) {
+		if (jumping.contains(event.getPlayer()) && event.isFlying() && event.getPlayer().hasPermission("ServerAddons.doubleJump") && maincfg.getBoolean("allowDoubleJump")) {
+			event.getPlayer().setFlying(false);
+			event.getPlayer().setAllowFlight(false);
+			if (maincfg.getBoolean("twoStageDoubleJump")) {
+				Vector v1 = new Vector(0,maincfg.getDouble("doubleJumpUp"),0).multiply(2);
+				event.getPlayer().setVelocity(v1);
+				Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+					@Override
+					public void run() {
+						Vector v2 = event.getPlayer().getLocation().getDirection().multiply(maincfg.getDouble("doubleJumpForward")).setY(maincfg.getDouble("doubleJumpUp") / 2);
+						event.getPlayer().setVelocity(v2);
+					}
+				},10);
+			} else {
+				Vector v = event.getPlayer().getLocation().getDirection().multiply(maincfg.getDouble("doubleJumpForward")).setY(maincfg.getDouble("doubleJumpUp"));
+				event.getPlayer().setVelocity(v);
+			}
+			Methods.playEffect(event.getPlayer().getLocation(), "Cloud", 0.5f, 200, false);
+			Methods.playSound("Enderdragon_Flap", event.getPlayer().getLocation(), event.getPlayer());
+		}
+	}
+	*/
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (cmd.getName().equalsIgnoreCase("toggleJump")) {
