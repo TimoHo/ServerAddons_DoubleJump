@@ -20,6 +20,8 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
+import me.tmods.api.Particle;
+import me.tmods.api.Sound;
 import me.tmods.serverutils.Methods;
 
 public class DoubleJump extends JavaPlugin implements Listener{
@@ -88,11 +90,11 @@ public class DoubleJump extends JavaPlugin implements Listener{
 				Vector v = event.getPlayer().getLocation().getDirection().multiply(maincfg.getDouble("doubleJumpForward")).setY(maincfg.getDouble("doubleJumpUp"));
 				event.getPlayer().setVelocity(v);
 			}
-			Methods.playEffect(event.getPlayer().getLocation(), "Cloud", 0.5f, 200, false);
-			Methods.playSound("Enderdragon_Flap", event.getPlayer().getLocation(), event.getPlayer());
+			Methods.playEffect(event.getPlayer().getLocation(), Particle.CLOUD, 0.5f, 200, false);
+			Methods.playSound(Sound.ENDERDRAGON_WINGS, event.getPlayer().getLocation(), event.getPlayer());
 		}
 		if (!event.getPlayer().getAllowFlight() && event.getPlayer().hasPermission("ServerAddons.doubleJump") && jumping.contains(event.getPlayer())) {
-			Methods.playEffect(event.getPlayer().getLocation(), "Firework_Spark", 0, 1, false);
+			Methods.playEffect(event.getPlayer().getLocation(), Particle.FIREWORKS_SPARK, 0, 1, false);
 		}
 		if (jumping.contains(event.getPlayer()) && event.getPlayer().getLocation().add(0,-1,0).getBlock().getType().isSolid() && event.getPlayer().hasPermission("ServerAddons.doubleJump")) {
 			event.getPlayer().setAllowFlight(true);
